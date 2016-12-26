@@ -1,3 +1,4 @@
-pub use self::dokku::Dokku;
-
 mod dokku;
+pub mod dokku_logger;
+
+pub use self::dokku::Dokku;

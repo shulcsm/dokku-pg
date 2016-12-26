@@ -11,6 +11,7 @@ serde = "0.8"
 serde_derive = "0.8"
 envy = "0.1"
 shiplift = { git = "https://github.com/shulcsm/shiplift", branch="fixes" }
+log = "*"
 
 [dependencies.toml]
 version = "0.2"

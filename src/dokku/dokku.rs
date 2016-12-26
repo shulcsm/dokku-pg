@@ -59,6 +59,11 @@ impl Dokku {
         })
     }
 
+    pub fn log_fail(&self, message: String) -> ! {
+        error!("{}", message);
+        process::exit(1)
+    }
+
     pub fn image_exists(&self, image: &str) -> bool {
         match self.docker
             .images()
@@ -82,12 +87,6 @@ impl Dokku {
                 .pull(&PullOptions::builder().image(image).build())
                 .unwrap()
                 .collect::<Vec<_>>();
-
-            /*
-            for output in image {
-                println!("{:?}", output);
-            }
-            */
         }
 
     }
