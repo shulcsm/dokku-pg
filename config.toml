@@ -1,6 +1,6 @@
 image = "postgres"
 version = "9.6.1"
-root = "/var/lib/dokku/services/postgres"
+root = "/var/lib/dokku/services/pg"
 
 
 #export PLUGIN_COMMAND_PREFIX="postgres"

@@ -6,11 +6,11 @@ authors = ["Mārtiņš Šulcs <shulcsm@gmail.com>"]
 
 
 [dependencies]
-hyper = "*"
+hyper = "0.9.14"
 serde = "0.8"
 serde_derive = "0.8"
 envy = "0.1"
-shiplift = { git = "https://github.com/shulcsm/shiplift", branch="fixes" }
+shiplift = { git = "https://github.com/shulcsm/shiplift", branch="update-config-serializer" }
 log = "*"
 
 [dependencies.toml]

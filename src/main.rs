@@ -70,7 +70,7 @@ fn main() {
         )
         .get_matches();
 
-    match matches.subcommand() {
+    let res = match matches.subcommand() {
         ("install", Some(..)) => plugin.install(),
         ("create", Some(create_matches)) => plugin.create(
             create_matches.value_of("name").unwrap(),
@@ -79,5 +79,7 @@ fn main() {
         ),
         ("", None) => plugin.no_command(),
         _ => plugin.not_implemented(),
-    }
+    };
+
+    plugin.exit(res)
 }
