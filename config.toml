@@ -1,7 +1,7 @@
 image = "postgres"
 version = "9.6.1"
 root = "/var/lib/dokku/services/pg"
-
+plugin_command_prefix = "pg"
 
 #export PLUGIN_COMMAND_PREFIX="postgres"
 #export PLUGIN_DATA_ROOT=$POSTGRES_ROOT

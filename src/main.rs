@@ -45,16 +45,16 @@ fn main() {
     dokku_logger::init().unwrap();
 
     let (dokku, config) = boostrap();
-    println!("{:#?}", config);
+    println!("{:#?} {:#?}", dokku.env, config);
     let plugin = Plugin::new(dokku, config);
 
     let matches = App::new("Dokku plugin: pg")
         .version("0.0.1")
     // We want to propogate to unreachable command so we can return dokku error code
         .setting(AppSettings::AllowExternalSubcommands)
-        .subcommand(SubCommand::with_name("install"))
+        .subcommand(SubCommand::with_name("pg:install"))
         .subcommand(
-            SubCommand::with_name("create")
+            SubCommand::with_name("pg:create")
                 .arg(Arg::with_name("name")
                      .help("Service name")
                      .value_name("NAME")
@@ -74,8 +74,8 @@ fn main() {
         .get_matches();
 
     let res = match matches.subcommand() {
-        ("install", Some(..)) => plugin.install(),
-        ("create", Some(create_matches)) => plugin.create(
+        ("pg:install", Some(..)) => plugin.install(),
+        ("pg:create", Some(create_matches)) => plugin.create(
             create_matches.value_of("name").unwrap(),
             create_matches.value_of("image").unwrap(),
             create_matches.value_of("port")
@@ -83,6 +83,7 @@ fn main() {
         ("", None) => plugin.no_command(),
         _ => plugin.not_implemented(),
     };
+    println!("{:#?}", res);
 
     plugin.exit(res)
 }

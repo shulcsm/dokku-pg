@@ -70,7 +70,7 @@ impl Dokku {
         }
     }
 
-    pub fn pull_docker_image(&self, image: String) {
+    pub fn pull_docker_image(&self, image: &str) {
         println!("Fetching image: {}", image);
 
         if self.image_exists(&image) {

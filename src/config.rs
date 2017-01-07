@@ -22,6 +22,7 @@ pub struct Config {
     pub image: String,
     pub version: String,
     pub root: String,
+    pub plugin_command_prefix: String,
 }
 
 impl Config {

@@ -1,7 +1,7 @@
 use std::process;
 use std::fs;
 use std::io;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 use dokku::Dokku;
 use config::Config;
@@ -30,6 +30,49 @@ impl From<io::Error> for PluginError {
 
 type PluginResult = Result<(), PluginError>;
 
+pub struct Service<'a, 'b> {
+    plugin: &'a Plugin,
+    name: &'b str,
+    root: PathBuf,
+}
+
+impl<'a, 'b> Service<'a, 'b> {
+    pub fn new(plugin: &'a Plugin, name: &'b str) -> Service<'a, 'b> {
+        let root = Path::new(&plugin.config.root).join(name);
+
+        // image??
+        Service {
+            plugin: plugin,
+            name: name,
+            root: root,
+        }
+    }
+
+    pub fn exists(&self) -> bool {
+        self.root.exists()
+    }
+
+    pub fn create(&self, image: &str) -> PluginResult {
+        // ensure image
+        self.plugin.dokku.pull_docker_image(image);
+
+        fs::create_dir_all(&self.root)?;
+        fs::create_dir_all(&self.root.join("data"))?;
+        fs::create_dir_all(&self.root.join("config"))?;
+
+        // postgres password
+        // custom env, links
+        // create container
+        // echo "dokku.${PLUGIN_COMMAND_PREFIX}.$SERVICE"
+
+        Ok(())
+    }
+
+    pub fn destroy(&self) {
+        //
+    }
+}
+
 impl Plugin {
     pub fn new(dokku: Dokku, config: Config) -> Plugin {
         let default_image = format!("{}:{}", config.image, config.version);
@@ -41,15 +84,16 @@ impl Plugin {
     }
 
     pub fn create(&self, name: &str, image: &str, port: Option<&str>) -> PluginResult {
-        println!("Create service: {:?}, {:?}, {:?}", name, image, port);
-        let path = Path::new(&self.config.root).join(name);
+        let service = Service::new(self, name);
 
-        if path.exists() {
+        println!("Create service: {:?}, {:?}, {:?}", name, image, port);
+        if service.exists() {
             return Err(PluginError::UnexpectedState {
                 msg: format!("PG service {} already exists.", name),
             });
         }
-        Ok(())
+
+        service.create(image)
     }
 
     pub fn no_command(&self) -> PluginResult {
@@ -62,8 +106,9 @@ impl Plugin {
 
     pub fn install(&self) -> PluginResult {
         println!("INSTALL");
-        self.dokku.pull_docker_image(format!("{}:{}", self.config.image, self.config.version));
-        self.dokku.pull_docker_image("dokkupaas/wait:0.2".to_string());
+        self.dokku.pull_docker_image(&self.default_image);
+        self.dokku.pull_docker_image("dokkupaas/wait:0.2");
+
         let root = Path::new(&self.config.root);
         fs::create_dir_all(&root)?;
         util::chown_by_name(&root, "dokku", "dokku")?;
