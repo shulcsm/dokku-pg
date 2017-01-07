@@ -1,6 +1,6 @@
 extern crate log;
 
-use log::{Log, LogLevel, LogLevelFilter, LogRecord, SetLoggerError, LogMetadata};
+use log::{LogLevel, LogLevelFilter, LogRecord, SetLoggerError, LogMetadata};
 
 pub struct DokkuLogger;
 
@@ -8,7 +8,7 @@ macro_rules! print_err {
     ($($arg:tt)*) => (
         {
             use std::io::prelude::*;
-            if let Err(e) = write!(&mut ::std::io::stderr(), "{}\n", format_args!($($arg)*)) {
+            if let Err(..) = write!(&mut ::std::io::stderr(), "{}\n", format_args!($($arg)*)) {
                 panic!("Failed to write to stderr.\
                         \nOriginal error out")
             }

@@ -1,14 +1,14 @@
 extern crate envy;
 
 use self::envy::Error;
-use std::env;
 
 use shiplift::errors::Error as DockerError;
 use hyper::status::StatusCode;
 use shiplift::{Docker, PullOptions};
-use std::process;
+
 
 // https://github.com/dokku/dokku/blob/7e25e747792bcb8d9d188d956823a1ac2460aab2/dokku
+#[allow(non_snake_case)]
 #[derive(Deserialize, Debug)]
 pub struct DokkuEnv {
     pub DOKKU_ROOT: String,
@@ -59,30 +59,25 @@ impl Dokku {
         })
     }
 
-    pub fn log_fail(&self, message: String) -> ! {
-        error!("{}", message);
-        process::exit(1)
-    }
-
     pub fn image_exists(&self, image: &str) -> bool {
         match self.docker
             .images()
             .get(image)
             .inspect() {
-                Ok(r) => true,
-                Err(DockerError::Fault { code: StatusCode::NotFound, .. }) => false,
-                Err(e) => panic!("{:?}", e),
-            }
+            Ok(..) => true,
+            Err(DockerError::Fault { code: StatusCode::NotFound, .. }) => false,
+            Err(e) => panic!("{:?}", e),
+        }
     }
 
     pub fn pull_docker_image(&self, image: String) {
         println!("Fetching image: {}", image);
 
-        if (self.image_exists(&image)) {
+        if self.image_exists(&image) {
             println!("Image exists.")
         } else {
             println!("Pulling image.");
-            let image = self.docker
+            let _image = self.docker
                 .images()
                 .pull(&PullOptions::builder().image(image).build())
                 .unwrap()

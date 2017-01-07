@@ -6,6 +6,8 @@ use std::path::Path;
 use dokku::Dokku;
 use config::Config;
 
+use util;
+
 pub struct Plugin {
     dokku: Dokku,
     config: Config,
@@ -13,7 +15,7 @@ pub struct Plugin {
 }
 
 #[derive(Debug)]
-enum PluginError {
+pub enum PluginError {
     Io(io::Error),
     NotImplemented,
     UnexpectedState { msg: String },
@@ -63,14 +65,18 @@ impl Plugin {
         self.dokku.pull_docker_image(format!("{}:{}", self.config.image, self.config.version));
         self.dokku.pull_docker_image("dokkupaas/wait:0.2".to_string());
         let root = Path::new(&self.config.root);
-        fs::create_dir_all(root)?;
+        fs::create_dir_all(&root)?;
+        util::chown_by_name(&root, "dokku", "dokku")?;
+
         Ok(())
     }
 
     pub fn exit(&self, result: PluginResult) -> ! {
         match result {
             Ok(..) => process::exit(self.dokku.env.DOKKU_VALID_EXIT),
-            Err(PluginError::NotImplemented) => process::exit(self.dokku.env.DOKKU_NOT_IMPLEMENTED_EXIT),
+            Err(PluginError::NotImplemented) => {
+                process::exit(self.dokku.env.DOKKU_NOT_IMPLEMENTED_EXIT)
+            }
             Err(e) => {
                 println!("ERROR: {:?}", e);
                 process::exit(1);

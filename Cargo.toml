@@ -3,8 +3,6 @@ name = "dokku-pg"
 version = "0.1.0"
 authors = ["Mārtiņš Šulcs <shulcsm@gmail.com>"]
 
-
-
 [dependencies]
 hyper = "0.9.14"
 serde = "0.8"
@@ -12,6 +10,7 @@ serde_derive = "0.8"
 envy = "0.1"
 shiplift = { git = "https://github.com/shulcsm/shiplift", branch="update-config-serializer" }
 log = "*"
+libc = "0.2"
 
 [dependencies.toml]
 version = "0.2"

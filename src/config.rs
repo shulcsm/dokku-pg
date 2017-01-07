@@ -27,7 +27,7 @@ pub struct Config {
 impl Config {
     pub fn new() -> Result<Config, Error> {
         // @TODO do something about this path
-        let mut path = std::env::current_dir()
+        let path = std::env::current_dir()
             .unwrap()
             .as_path()
             .join("config.toml");

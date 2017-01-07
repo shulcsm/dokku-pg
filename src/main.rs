@@ -9,6 +9,7 @@ extern crate log;
 extern crate shiplift;
 extern crate clap;
 extern crate hyper;
+extern crate libc;
 
 use clap::{App, AppSettings, Arg, SubCommand};
 use std::process;
@@ -23,9 +24,11 @@ use config::Config;
 mod plugin;
 use plugin::{Plugin};
 
+mod util;
+
 fn terminate(message: String) -> ! {
     let mut stderr = std::io::stderr();
-    stderr.write(message.as_bytes());
+    stderr.write(message.as_bytes()).unwrap();
     process::exit(1);
 }
 
