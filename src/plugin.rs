@@ -37,7 +37,7 @@ pub struct Service<'a> {
     image: String,
     root_dir: PathBuf,
     data_dir: PathBuf,
-    config_dir: PathBuf
+    config_dir: PathBuf,
 }
 
 impl<'a> Service<'a> {
@@ -63,7 +63,7 @@ impl<'a> Service<'a> {
 
     pub fn get_password(&self) -> Result<String, PluginError> {
         let mut password = String::new();
-        fs::File::open(&self.root_dir.join("PASSWORD"))?.read_to_string(&mut password);
+        fs::File::open(&self.root_dir.join("PASSWORD"))?.read_to_string(&mut password)?;
         Ok(password)
     }
 
@@ -79,16 +79,16 @@ impl<'a> Service<'a> {
     }
 
     pub fn container_options(&self) -> Result<ContainerOptions, PluginError> {
-        let data_volume = format!("{}:{}", self.data_dir.to_str().unwrap(), "/var/lib/postgresql/data");
-        let env = self.build_env()?;
+        let data_volume = format!("{}:{}",
+                                  self.data_dir.to_str().unwrap(),
+                                  "/var/lib/postgresql/data");
 
         // @TODO labels
         Ok(ContainerOptions::builder(&self.image)
-           .name(&self.name)
-           .volumes(vec![&data_volume])
-           .env(self.build_env()?.iter().map(|s| &**s).collect())
-           .build()
-        )
+            .name(self.plugin.get_container_name(&self.name).as_str())
+            .volumes(vec![&data_volume])
+            .env(self.build_env()?.iter().map(|s| &**s).collect())
+            .build())
     }
 
     pub fn install(&self) -> PluginResult {
@@ -122,6 +122,10 @@ impl Plugin {
             config: config,
             default_image: default_image,
         }
+    }
+
+    pub fn get_container_name(&self, name: &str) -> String {
+        format!("dokku.{}.{}", self.config.plugin_command_prefix, name)
     }
 
     pub fn create(&self, name: &str, image: &str, port: Option<&str>) -> PluginResult {
