@@ -10,6 +10,8 @@ extern crate shiplift;
 extern crate clap;
 extern crate hyper;
 extern crate libc;
+extern crate rand;
+
 
 use clap::{App, AppSettings, Arg, SubCommand};
 use std::process;

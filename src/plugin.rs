@@ -1,7 +1,8 @@
 use std::process;
 use std::fs;
-use std::io;
+use std::io::{self, Write, Read, BufReader, BufRead};
 use std::path::{Path, PathBuf};
+use shiplift::ContainerOptions;
 
 use dokku::Dokku;
 use config::Config;
@@ -30,43 +31,83 @@ impl From<io::Error> for PluginError {
 
 type PluginResult = Result<(), PluginError>;
 
-pub struct Service<'a, 'b> {
+pub struct Service<'a> {
     plugin: &'a Plugin,
-    name: &'b str,
-    root: PathBuf,
+    name: String,
+    image: String,
+    root_dir: PathBuf,
+    data_dir: PathBuf,
+    config_dir: PathBuf
 }
 
-impl<'a, 'b> Service<'a, 'b> {
-    pub fn new(plugin: &'a Plugin, name: &'b str) -> Service<'a, 'b> {
+impl<'a> Service<'a> {
+    pub fn new(plugin: &'a Plugin, name: &str, image: &str) -> Service<'a> {
         let root = Path::new(&plugin.config.root).join(name);
+        let data = root.join("data");
+        let config = root.join("config");
 
         // image??
         Service {
             plugin: plugin,
-            name: name,
-            root: root,
+            name: name.to_owned(),
+            image: image.to_owned(),
+            root_dir: root,
+            data_dir: data,
+            config_dir: config,
         }
     }
 
-    pub fn exists(&self) -> bool {
-        self.root.exists()
+    pub fn installed(&self) -> bool {
+        self.root_dir.exists()
     }
 
-    pub fn create(&self, image: &str) -> PluginResult {
-        // ensure image
-        self.plugin.dokku.pull_docker_image(image);
+    pub fn get_password(&self) -> Result<String, PluginError> {
+        let mut password = String::new();
+        fs::File::open(&self.root_dir.join("PASSWORD"))?.read_to_string(&mut password);
+        Ok(password)
+    }
 
-        fs::create_dir_all(&self.root)?;
-        fs::create_dir_all(&self.root.join("data"))?;
-        fs::create_dir_all(&self.root.join("config"))?;
+    fn build_env(&self) -> Result<Vec<String>, PluginError> {
+        let mut env = Vec::new();
+        env.push(format!("POSTGRES_PASSWORD={}", self.get_password()?));
+        let env_file = fs::File::open(&self.root_dir.join("PASSWORD"))?;
 
-        // postgres password
-        // custom env, links
+        for line in BufReader::new(&env_file).lines() {
+            env.push(line?);
+        }
+        Ok(env)
+    }
+
+    pub fn container_options(&self) -> Result<ContainerOptions, PluginError> {
+        let data_volume = format!("{}:{}", self.data_dir.to_str().unwrap(), "/var/lib/postgresql/data");
+        let env = self.build_env()?;
+
+        // @TODO labels
+        Ok(ContainerOptions::builder(&self.image)
+           .name(&self.name)
+           .volumes(vec![&data_volume])
+           .env(self.build_env()?.iter().map(|s| &**s).collect())
+           .build()
+        )
+    }
+
+    pub fn install(&self) -> PluginResult {
+
+        fs::create_dir_all(&self.root_dir)?;
+        fs::create_dir_all(&self.data_dir)?;
+        fs::create_dir_all(&self.config_dir)?;
+
+        let pass = util::generate_password();
+        fs::File::create(&self.root_dir.join("PASSWORD"))?.write_all(pass.as_bytes())?;
+        // @TODO
+        fs::File::create(&self.root_dir.join("ENV"))?;
+
         // create container
         // echo "dokku.${PLUGIN_COMMAND_PREFIX}.$SERVICE"
 
         Ok(())
     }
+
 
     pub fn destroy(&self) {
         //
@@ -84,16 +125,23 @@ impl Plugin {
     }
 
     pub fn create(&self, name: &str, image: &str, port: Option<&str>) -> PluginResult {
-        let service = Service::new(self, name);
+        let service = Service::new(self, name, image);
 
         println!("Create service: {:?}, {:?}, {:?}", name, image, port);
-        if service.exists() {
-            return Err(PluginError::UnexpectedState {
-                msg: format!("PG service {} already exists.", name),
-            });
-        }
 
-        service.create(image)
+        if service.installed() {
+            Err(PluginError::UnexpectedState {
+                msg: format!("PG service {} already exists.", name),
+            })
+        } else {
+            service.install()?;
+            // ensure image
+            self.dokku.pull_docker_image(image);
+            let opts = service.container_options()?;
+            let res = self.dokku.docker.containers().create(&opts);
+            println!("{:?}", res);
+            Ok(())
+        }
     }
 
     pub fn no_command(&self) -> PluginResult {

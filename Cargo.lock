@@ -7,9 +7,10 @@ dependencies = [
  "hyper 0.9.14 (registry+https://github.com/rust-lang/crates.io-index)",
  "libc 0.2.18 (registry+https://github.com/rust-lang/crates.io-index)",
  "log 0.3.6 (registry+https://github.com/rust-lang/crates.io-index)",
+ "rand 0.3.15 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde 0.8.20 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde_derive 0.8.20 (registry+https://github.com/rust-lang/crates.io-index)",
- "shiplift 0.3.0 (git+https://github.com/shulcsm/shiplift?branch=update-config-serializer)",
+ "shiplift 0.3.0 (git+https://github.com/shulcsm/shiplift?branch=container-name)",
  "toml 0.2.1 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
@@ -336,7 +337,7 @@ dependencies = [
 [[package]]
 name = "shiplift"
 version = "0.3.0"
-source = "git+https://github.com/shulcsm/shiplift?branch=update-config-serializer#5c7c21bffa3f462b68391b015c8233b1957a5470"
+source = "git+https://github.com/shulcsm/shiplift?branch=container-name#6f91a8ebe4a7a0f7c330e9d88a1a92f791e2691e"
 dependencies = [
  "flate2 0.2.14 (registry+https://github.com/rust-lang/crates.io-index)",
  "hyper 0.9.14 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -552,7 +553,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 "checksum serde_codegen 0.8.20 (registry+https://github.com/rust-lang/crates.io-index)" = "460354e47fffa7cf0c96fcf9a040fd170e957f43dd8032531083866eb4a51c11"
 "checksum serde_codegen_internals 0.11.2 (registry+https://github.com/rust-lang/crates.io-index)" = "55224f713f022184a1c332dc5c8b1ac634d25a355d54836386771947f12585e0"
 "checksum serde_derive 0.8.20 (registry+https://github.com/rust-lang/crates.io-index)" = "18030bce88caabea7707ea4150557377f4b08df5ba3909b2c6a9cb34967c9f30"
-"checksum shiplift 0.3.0 (git+https://github.com/shulcsm/shiplift?branch=update-config-serializer)" = "<none>"
+"checksum shiplift 0.3.0 (git+https://github.com/shulcsm/shiplift?branch=container-name)" = "<none>"
 "checksum solicit 0.4.4 (registry+https://github.com/rust-lang/crates.io-index)" = "172382bac9424588d7840732b250faeeef88942e37b6e35317dce98cafdd75b2"
 "checksum syn 0.10.3 (registry+https://github.com/rust-lang/crates.io-index)" = "94e7d81ecd16d39f16193af05b8d5a0111b9d8d2f3f78f31760f327a247da777"
 "checksum tar 0.3.4 (registry+https://github.com/rust-lang/crates.io-index)" = "6c6822c3d8ba96e87e15ca454a3db0d0915e7f0b52046b15604f6d50f40bad0e"

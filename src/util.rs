@@ -3,7 +3,11 @@ use std::ffi::{CString};
 use std::os::unix::ffi::OsStrExt;
 use libc::{self, uid_t, gid_t, c_char};
 use std::io;
+use rand::{thread_rng, Rng};
 
+pub fn generate_password() -> String {
+    thread_rng().gen_ascii_chars().take(16).collect::<String>()
+}
 
 fn get_gid_by_name(name: &str) -> Option<gid_t> {
     unsafe {
